@@ -20,8 +20,11 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  this.getArea = () => this.width * this.height;
+  return this;
 }
 
 
@@ -35,8 +38,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -51,8 +54,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = JSON.parse(json);
+  Object.setPrototypeOf(obj, proto);
+  return obj;
 }
 
 
@@ -110,33 +115,115 @@ function fromJSON(/* proto, json */) {
  *  For more examples see unit tests.
  */
 
+class ElSuperBuilder {
+  constructor(el = '') {
+    this.selector = el;
+    this.metrics = {
+      idOccurrence: 0,
+      elementOccurrence: 0,
+      pseudoElementOccurrence: 0,
+      classOccurrence: 0,
+      attrOccurrence: 0,
+      pseudoClassOccurrence: 0,
+      order: true,
+    };
+  }
+
+  element(value) {
+    if (this.metrics.idOccurrence) this.metrics.order = false;
+    this.metrics.elementOccurrence += 1;
+    this.throwError();
+    this.selector = value;
+    return this;
+  }
+
+  id(value) {
+    if (this.metrics.classOccurrence
+      || this.metrics.pseudoElementOccurrence) this.metrics.order = false;
+    this.metrics.idOccurrence += 1;
+    this.throwError();
+    this.selector += `#${value}`;
+    return this;
+  }
+
+  class(value) {
+    if (this.metrics.attrOccurrence) this.metrics.order = false;
+    this.metrics.classOccurrence += 1;
+    this.throwError();
+    this.selector += `.${value}`;
+    return this;
+  }
+
+  attr(value) {
+    if (this.metrics.pseudoClassOccurrence) this.metrics.order = false;
+    this.metrics.attrOccurrence += 1;
+    this.throwError();
+    this.selector += `[${value}]`;
+    return this;
+  }
+
+  pseudoClass(value) {
+    if (this.metrics.pseudoElementOccurrence) this.metrics.order = false;
+    this.metrics.pseudoClassOccurrence += 1;
+    this.throwError();
+    this.selector += `:${value}`;
+    return this;
+  }
+
+  pseudoElement(value) {
+    // if (this.metrics.id) this.metrics.order = false;
+    this.metrics.pseudoElementOccurrence += 1;
+    this.throwError();
+    this.selector += `::${value}`;
+    return this;
+  }
+
+  combine(selector1, combinator, selector2) {
+    this.selector = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return this;
+  }
+
+  throwError() {
+    if (this.metrics.elementOccurrence > 1 || this.metrics.pseudoElementOccurrence > 1 || this.metrics.idOccurrence > 1) { throw new Error('Element, id and pseudo-element should not occur more then one time inside the selector'); }
+    if (!this.metrics.order) throw new Error('Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element');
+  }
+
+  stringify() {
+    return this.selector;
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new ElSuperBuilder(value).element(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    return new ElSuperBuilder().id(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    return new ElSuperBuilder().class(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    return new ElSuperBuilder().attr(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    return new ElSuperBuilder().pseudoClass(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    return new ElSuperBuilder().pseudoElement(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    return new ElSuperBuilder().combine(selector1, combinator, selector2);
+  },
+
+  stringify() {
+    this.element.stringify();
   },
 };
 
