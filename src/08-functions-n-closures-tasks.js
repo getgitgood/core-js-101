@@ -24,9 +24,7 @@
  *
  */
 function getComposition(f, g) {
-  return function (...x) {
-    return f(g(...x));
-  };
+  return (...x) => f(g(...x));
 }
 
 
@@ -48,9 +46,7 @@ function getComposition(f, g) {
  */
 function getPowerFunction(exponent) {
   const exp = exponent;
-  return function (x) {
-    return x ** exp;
-  };
+  return (x) => x ** exp;
 }
 
 
@@ -107,8 +103,7 @@ function memoize(/* func */) {
  * retryer() => 2
  */
 function retry(func, attempts) {
-  // eslint-disable-next-line func-names, consistent-return
-  return function () {
+  return () => {
     for (let i = 0; i < attempts; i += 1) {
       try {
         return func();
@@ -116,6 +111,7 @@ function retry(func, attempts) {
         // something something
       }
     }
+    return 'something good';
   };
 }
 
@@ -144,7 +140,7 @@ function retry(func, attempts) {
  *
  */
 function logger(func, logFunc) {
-  return function (...args) {
+  return (...args) => {
     const argsStr = JSON.stringify(args);
     logFunc(`${func.name}(${argsStr.slice(1, -1)}) starts`);
     const res = func(...args);
@@ -195,10 +191,10 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId10() => 11
  */
 function getIdGeneratorFunction(startFrom) {
-  let id = startFrom;
-  return function () {
-    // eslint-disable-next-line no-plusplus
-    return id++;
+  let id = startFrom - 1;
+  return () => {
+    id += 1;
+    return id;
   };
 }
 
