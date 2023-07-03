@@ -23,8 +23,10 @@
  *   getComposition(Math.sin, Math.asin)(x) => Math.sin(Math.asin(x))
  *
  */
-function getComposition(/* f, g */) {
-  throw new Error('Not implemented');
+function getComposition(f, g) {
+  return function (...x) {
+    return f(g(...x));
+  };
 }
 
 
@@ -44,8 +46,11 @@ function getComposition(/* f, g */) {
  *   power05(16) => 4
  *
  */
-function getPowerFunction(/* exponent */) {
-  throw new Error('Not implemented');
+function getPowerFunction(exponent) {
+  const exp = exponent;
+  return function (x) {
+    return x ** exp;
+  };
 }
 
 
@@ -101,8 +106,17 @@ function memoize(/* func */) {
  * }, 2);
  * retryer() => 2
  */
-function retry(/* func, attempts */) {
-  throw new Error('Not implemented');
+function retry(func, attempts) {
+  // eslint-disable-next-line func-names, consistent-return
+  return function () {
+    for (let i = 0; i < attempts; i += 1) {
+      try {
+        return func();
+      } catch (error) {
+        // something something
+      }
+    }
+  };
 }
 
 
@@ -129,8 +143,14 @@ function retry(/* func, attempts */) {
  * cos(3.141592653589793) ends
  *
  */
-function logger(/* func, logFunc */) {
-  throw new Error('Not implemented');
+function logger(func, logFunc) {
+  return function (...args) {
+    const argsStr = JSON.stringify(args);
+    logFunc(`${func.name}(${argsStr.slice(1, -1)}) starts`);
+    const res = func(...args);
+    logFunc(`${func.name}(${argsStr.slice(1, -1)}) ends`);
+    return res;
+  };
 }
 
 
@@ -148,6 +168,11 @@ function logger(/* func, logFunc */) {
  *   partialUsingArguments(fn, 'a','b','c','d')() => 'abcd'
  */
 function partialUsingArguments(/* fn, ...args1 */) {
+  // const argsArray = Array.from(arguments.slice(1));
+  // return function () {
+  //   const args = Array.from(arguments);
+  //   return fn.apply(null, [argsArray, ...args]);
+  // };
   throw new Error('Not implemented');
 }
 
@@ -169,8 +194,12 @@ function partialUsingArguments(/* fn, ...args1 */) {
  *   getId4() => 7
  *   getId10() => 11
  */
-function getIdGeneratorFunction(/* startFrom */) {
-  throw new Error('Not implemented');
+function getIdGeneratorFunction(startFrom) {
+  let id = startFrom;
+  return function () {
+    // eslint-disable-next-line no-plusplus
+    return id++;
+  };
 }
 
 
